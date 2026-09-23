@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import NoteList from '../components/NoteList.astro';
+import { SITE, TOPICS } from '../data/site';
+import { getNotes } from '../lib/notes';
+const notes = await getNotes();
+const count = (slug: string) => notes.filter((n) => n.data.topics.includes(slug)).length;
+---
+<Base>
+  <header class="intro">
+    <h1>{SITE.title}</h1>
+    <p class="lead">{SITE.lead}</p>
+    <nav class="nav">
+      <a href="#interests">Интересы</a>
+      <a href="#latest">Заметки</a>
+      <a href="#now">Сейчас</a>
+      <a href="#contact">Связь</a>
+    </nav>
+  </header>
+
+  <section id="interests">
+    <h2>Что меня увлекает</h2>
+    {TOPICS.map((t) => (
+      <article class="topic">
+        <h3><a href={`/topics/${t.slug}/`}>{t.title}</a></h3>
+        <p>{t.description}</p>
+        <p class="muted">Заметок: {count(t.slug)}</p>
+      </article>
+    ))}
+  </section>
+
+  <section id="latest">
+    <h2>Последние заметки</h2>
+    <NoteList notes={notes.slice(0, 5)} />
+    {notes.length > 5 && <p><a href="/notes/">Все заметки →</a></p>}
+  </section>
+
+  <section id="now">
+    <h2>Сейчас</h2>
+    <p>{SITE.now}</p>
+    <p class="muted">Обновлено: {SITE.nowUpdated}</p>
+  </section>
+
+  <section id="contact">
+    <h2>Связь</h2>
+    <ul class="contacts">
+      <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+    </ul>
+  </section>
+</Base>

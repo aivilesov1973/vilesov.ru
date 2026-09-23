@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import NoteList from '../../components/NoteList.astro';
+import { TOPICS } from '../../data/site';
+import { getNotes } from '../../lib/notes';
+
+export async function getStaticPaths() {
+  const all = await getNotes();
+  return TOPICS.map((topic) => ({
+    params: { slug: topic.slug },
+    props: { topic, notes: all.filter((n) => n.data.topics.includes(topic.slug)) },
+  }));
+}
+const { topic, notes } = Astro.props;
+---
+<Base title={topic.title} description={topic.description}>
+  <p class="crumbs"><a href="/">← На главную</a></p>
+  <h1>{topic.title}</h1>
+  <p class="lead">{topic.description}</p>
+  <section>
+    <h2>Заметки</h2>
+    <NoteList notes={notes} />
+  </section>
+</Base>

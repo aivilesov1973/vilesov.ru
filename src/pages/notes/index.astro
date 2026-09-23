@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import NoteList from '../../components/NoteList.astro';
+import { getNotes } from '../../lib/notes';
+const notes = await getNotes();
+---
+<Base title="Все заметки">
+  <p class="crumbs"><a href="/">← На главную</a></p>
+  <h1>Все заметки</h1>
+  <NoteList notes={notes} />
+</Base>
