@@ -7,6 +7,15 @@ const notes = await getNotes();
 const count = (slug: string) => notes.filter((n) => n.data.topics.includes(slug)).length;
 ---
 <Base>
+  <figure class="hero">
+    <img
+      src="/img/hero.webp"
+      width="640"
+      height="427"
+      alt="Ночная набережная, на крыше здания светится надпись: кто мы, откуда, куда мы идём?"
+    />
+  </figure>
+
   <header class="intro">
     <h1>{SITE.title}</h1>
     <p class="lead">{SITE.lead}</p>

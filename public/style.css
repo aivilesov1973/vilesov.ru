@@ -99,3 +99,7 @@ section {
   background: var(--line); padding: 1px 5px; border-radius: 4px;
 }
 .foot a { color: var(--muted); border: 0; }
+
+/* --- Шапка с фотографией --- */
+.hero { margin: 0 0 40px; }
+.hero img { display: block; width: 100%; height: auto; border-radius: 8px; }
