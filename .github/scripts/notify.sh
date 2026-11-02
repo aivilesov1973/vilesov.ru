@@ -4,8 +4,11 @@
 # Если они не заданы, шаг не падает: пишет предупреждение и выходит с кодом 0.
 set -uo pipefail
 
-if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [ -z "${TELEGRAM_CHAT_ID:-}" ]; then
-  echo "::warning::TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID не заданы — уведомление пропущено"
+missing=""
+[ -z "${TELEGRAM_BOT_TOKEN:-}" ] && missing="TELEGRAM_BOT_TOKEN"
+[ -z "${TELEGRAM_CHAT_ID:-}" ] && missing="${missing:+$missing, }TELEGRAM_CHAT_ID"
+if [ -n "$missing" ]; then
+  echo "::warning::пустые секреты: $missing — уведомление пропущено"
   exit 0
 fi
 
