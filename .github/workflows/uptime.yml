@@ -5,12 +5,18 @@ on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      test_notify:
+        description: 'Только отправить тестовое сообщение в Telegram'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   check:
+    if: ${{ inputs.test_notify != true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -19,7 +25,7 @@ jobs:
 
   notify:
     needs: check
-    if: always() && needs.check.result == 'failure'
+    if: always() && inputs.test_notify != true && needs.check.result == 'failure'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -33,4 +39,20 @@ jobs:
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           JOBS: check=${{ needs.check.result }}
+        run: bash .github/scripts/notify.sh
+
+  test-notify:
+    if: ${{ inputs.test_notify == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Telegram test
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: test
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: bash .github/scripts/notify.sh

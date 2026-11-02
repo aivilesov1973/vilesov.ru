@@ -16,6 +16,7 @@ case "$status" in
   success)  icon="✅" ;;
   failure)  icon="🔴" ;;
   cancelled) icon="⚪" ;;
+  test)     icon="🧪" ;;
   *)        icon="ℹ️" ;;
 esac
 
