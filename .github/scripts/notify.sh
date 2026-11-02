@@ -24,7 +24,9 @@ TELEGRAM_BOT_TOKEN="$(trim "$TELEGRAM_BOT_TOKEN")"
 TELEGRAM_CHAT_ID="$(trim "$TELEGRAM_CHAT_ID")"
 
 if ! printf '%s' "$TELEGRAM_BOT_TOKEN" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
-  echo "::error::TELEGRAM_BOT_TOKEN не похож на токен бота: длина ${#TELEGRAM_BOT_TOKEN}, ожидается вид 123456789:AA..."
+  colons=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | tr -cd ':' | wc -c | tr -d ' ')
+  nonascii=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | LC_ALL=C tr -d '\000-\177' | wc -c | tr -d ' ')
+  echo "::error::TELEGRAM_BOT_TOKEN не похож на токен бота: длина ${#TELEGRAM_BOT_TOKEN} (норма ~46), двоеточий: $colons, не-ASCII символов: $nonascii"
   exit 1
 fi
 if ! printf '%s' "$TELEGRAM_CHAT_ID" | grep -Eq '^-?[0-9]+$'; then
