@@ -22,7 +22,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -36,3 +37,13 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Проверяем живой домен после публикации: Pages умеет отдавать 404
+  # при формально успешном деплое (так сайт пролежал 6 недель в сентябре).
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that vilesov.ru is live
+        run: bash .github/scripts/smoke.sh
