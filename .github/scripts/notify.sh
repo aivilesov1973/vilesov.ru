@@ -12,6 +12,26 @@ if [ -n "$missing" ]; then
   exit 0
 fi
 
+# Секрет легко скопировать с переводом строки или пробелом на конце —
+# curl в таком случае падает с «Malformed input to a URL function».
+trim() {
+  local v="${1:-}"
+  v="${v#"${v%%[![:space:]]*}"}"
+  v="${v%"${v##*[![:space:]]}"}"
+  printf '%s' "$v"
+}
+TELEGRAM_BOT_TOKEN="$(trim "$TELEGRAM_BOT_TOKEN")"
+TELEGRAM_CHAT_ID="$(trim "$TELEGRAM_CHAT_ID")"
+
+if ! printf '%s' "$TELEGRAM_BOT_TOKEN" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
+  echo "::error::TELEGRAM_BOT_TOKEN не похож на токен бота: длина ${#TELEGRAM_BOT_TOKEN}, ожидается вид 123456789:AA..."
+  exit 1
+fi
+if ! printf '%s' "$TELEGRAM_CHAT_ID" | grep -Eq '^-?[0-9]+$'; then
+  echo "::error::TELEGRAM_CHAT_ID должен быть числом, а пришло ${#TELEGRAM_CHAT_ID} символов — вставлено не то значение"
+  exit 1
+fi
+
 repo="${REPO:-}" workflow="${WORKFLOW:-}" status="${STATUS:-unknown}"
 run_url="${RUN_URL:-}" commit="${COMMIT:-}" jobs="${JOBS:-}"
 
