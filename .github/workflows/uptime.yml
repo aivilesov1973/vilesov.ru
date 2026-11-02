@@ -13,6 +13,24 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: vilesov.ru отвечает
         run: bash .github/scripts/smoke.sh
+
+  notify:
+    needs: check
+    if: always() && needs.check.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Telegram alert
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: failure
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOBS: check=${{ needs.check.result }}
+        run: bash .github/scripts/notify.sh
