@@ -90,10 +90,10 @@ jobs:
             | jq -c '{ok, username: .result.username, id: .result.id, can_read_all_group_messages: .result.can_read_all_group_messages}'
           echo "--- getWebhookInfo ---"
           curl -sS -m 20 "https://api.telegram.org/bot${token}/getWebhookInfo" 2>/dev/null \
-            | jq -c '.result | {url, pending_update_count, last_error_date, last_error_message, last_synchronization_error_date, max_connections}'
+            | jq -c '{url: (.result.url // ""), pending: (.result.pending_update_count // "?"), last_error: (.result.last_error_message // "нет"), last_error_date: (.result.last_error_date // 0)}'
           echo "--- getUpdates (конфликт = вебхук включён и перехватывает обновления) ---"
           curl -sS -m 20 "https://api.telegram.org/bot${token}/getUpdates" 2>/dev/null \
-            | jq -c '{ok, description, updates: (.result | length?)}'
+            | jq -c '{ok, description, updates: ((.result // []) | length), kinds: ([(.result // [])[] | keys[] | select(. != "update_id")] | unique)}'
           echo "--- команды бота ---"
           curl -sS -m 20 "https://api.telegram.org/bot${token}/getMyCommands" 2>/dev/null \
             | jq -c '{ok, commands: [.result[]?.command]}'
