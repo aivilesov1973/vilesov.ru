@@ -14,6 +14,10 @@ on:
         description: 'Проверить аварийный путь: смоук по заведомо битому URL'
         type: boolean
         default: false
+      diag:
+        description: 'Диагностика бота: вебхук, очередь обновлений, ошибки'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -66,3 +70,30 @@ jobs:
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: bash .github/scripts/notify.sh
+
+  # Диагностика: почему бот не реагирует на кнопки.
+  diag:
+    if: ${{ inputs.diag }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Состояние бота
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          token=$(printf '%s' "$TOKEN" | tr -d '[:space:]')
+          if ! printf '%s' "$token" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
+            echo "::error::токен в секрете не похож на токен"; exit 1
+          fi
+          echo "--- getMe ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getMe" 2>/dev/null \
+            | jq -c '{ok, username: .result.username, id: .result.id, can_read_all_group_messages: .result.can_read_all_group_messages}'
+          echo "--- getWebhookInfo ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getWebhookInfo" 2>/dev/null \
+            | jq -c '.result | {url, pending_update_count, last_error_date, last_error_message, last_synchronization_error_date, max_connections}'
+          echo "--- getUpdates (конфликт = вебхук включён и перехватывает обновления) ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getUpdates" 2>/dev/null \
+            | jq -c '{ok, description, updates: (.result | length?)}'
+          echo "--- команды бота ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getMyCommands" 2>/dev/null \
+            | jq -c '{ok, commands: [.result[]?.command]}'
