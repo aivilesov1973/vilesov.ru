@@ -1,0 +1,68 @@
+name: Uptime check
+
+# Ловит падения между деплоями: сайт мог лежать, пока никто не пушил.
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: 'Только отправить тестовое сообщение в Telegram'
+        type: boolean
+        default: false
+      force_fail:
+        description: 'Проверить аварийный путь: смоук по заведомо битому URL'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: ${{ !inputs.test_notify }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: vilesov.ru отвечает
+        run: |
+          if [ "${{ inputs.force_fail }}" = "true" ]; then
+            echo "::warning::Режим проверки алертов: смоук по заведомо битому URL"
+            SMOKE_ATTEMPTS=1 SMOKE_DELAY=1 bash .github/scripts/smoke.sh "https://vilesov.ru/net-takoy-stranicy/"
+          else
+            bash .github/scripts/smoke.sh
+          fi
+
+  notify:
+    needs: check
+    if: always() && !inputs.test_notify && needs.check.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Telegram alert
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: failure
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOBS: check=${{ needs.check.result }}
+        run: bash .github/scripts/notify.sh
+
+  test-notify:
+    if: ${{ inputs.test_notify }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Telegram test
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: test
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/notify.sh
