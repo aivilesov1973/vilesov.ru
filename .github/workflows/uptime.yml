@@ -10,13 +10,17 @@ on:
         description: 'Только отправить тестовое сообщение в Telegram'
         type: boolean
         default: false
+      discover_chat:
+        description: 'Показать chat id, которые видит бот (напишите боту сообщение)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   check:
-    if: ${{ inputs.test_notify != true }}
+    if: ${{ !inputs.test_notify && !inputs.discover_chat }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -25,7 +29,7 @@ jobs:
 
   notify:
     needs: check
-    if: always() && inputs.test_notify != true && needs.check.result == 'failure'
+    if: always() && !inputs.test_notify && !inputs.discover_chat && needs.check.result == 'failure'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -42,7 +46,7 @@ jobs:
         run: bash .github/scripts/notify.sh
 
   test-notify:
-    if: ${{ inputs.test_notify == true }}
+    if: ${{ inputs.test_notify }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -56,3 +60,44 @@ jobs:
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: bash .github/scripts/notify.sh
+
+  discover-chat:
+    if: ${{ inputs.discover_chat }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: getMe и chat id
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          token=$(printf '%s' "$TOKEN" | tr -d '[:space:]')
+          if ! printf '%s' "$token" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
+            echo "::error::секрет TELEGRAM_BOT_TOKEN не похож на токен: длина ${#token}, двоеточий $(printf '%s' "$token" | tr -cd ':' | wc -c | tr -d ' ')"
+            exit 1
+          fi
+          echo "--- getMe ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getMe" 2>/dev/null | python3 -c "
+import json,sys
+try: d=json.load(sys.stdin)
+except Exception: print('нет ответа от Telegram'); raise SystemExit
+r=d.get('result') or {}
+print('ok:', d.get('ok'), '| бот:', r.get('username'), '| id:', r.get('id'))
+"
+          echo "--- chat id из последних сообщений ---"
+          curl -sS -m 20 "https://api.telegram.org/bot${token}/getUpdates" 2>/dev/null | python3 -c "
+import json,sys
+try: d=json.load(sys.stdin)
+except Exception: print('нет ответа от Telegram'); raise SystemExit
+if not d.get('ok'):
+    print('Telegram ответил ошибкой:', d.get('description')); raise SystemExit
+seen={}
+for u in d.get('result',[]):
+    m=u.get('message') or u.get('edited_message') or u.get('channel_post') or {}
+    c=m.get('chat') or {}
+    if c.get('id'):
+        seen[c['id']]=c.get('username') or c.get('title') or c.get('first_name') or ''
+if not seen:
+    print('обновлений нет: напишите боту любое сообщение и запустите снова')
+for cid,who in seen.items():
+    print(f'CHAT_ID={cid}  ({who})')
+"
