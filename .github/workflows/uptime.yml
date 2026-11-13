@@ -10,8 +10,8 @@ on:
         description: 'Только отправить тестовое сообщение в Telegram'
         type: boolean
         default: false
-      discover_chat:
-        description: 'Показать chat id, которые видит бот (напишите боту сообщение)'
+      force_fail:
+        description: 'Проверить аварийный путь: смоук по заведомо битому URL'
         type: boolean
         default: false
 
@@ -20,16 +20,22 @@ permissions:
 
 jobs:
   check:
-    if: ${{ !inputs.test_notify && !inputs.discover_chat }}
+    if: ${{ !inputs.test_notify }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: vilesov.ru отвечает
-        run: bash .github/scripts/smoke.sh
+        run: |
+          if [ "${{ inputs.force_fail }}" = "true" ]; then
+            echo "::warning::Режим проверки алертов: смоук по заведомо битому URL"
+            SMOKE_ATTEMPTS=1 SMOKE_DELAY=1 bash .github/scripts/smoke.sh "https://vilesov.ru/net-takoy-stranicy/"
+          else
+            bash .github/scripts/smoke.sh
+          fi
 
   notify:
     needs: check
-    if: always() && !inputs.test_notify && !inputs.discover_chat && needs.check.result == 'failure'
+    if: always() && !inputs.test_notify && needs.check.result == 'failure'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -60,36 +66,3 @@ jobs:
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: bash .github/scripts/notify.sh
-
-  # Разово при настройке: показывает chat id, которые видит бот.
-  discover-chat:
-    if: ${{ inputs.discover_chat }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: getMe и chat id
-        env:
-          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        run: |
-          token=$(printf '%s' "$TOKEN" | tr -d '[:space:]')
-          if ! printf '%s' "$token" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
-            echo "::error::секрет TELEGRAM_BOT_TOKEN не похож на токен: длина ${#token}, двоеточий $(printf '%s' "$token" | tr -cd ':' | wc -c | tr -d ' ')"
-            exit 1
-          fi
-
-          # 2>/dev/null — чтобы curl не вывел в лог URL вместе с токеном
-          me=$(curl -sS -m 20 "https://api.telegram.org/bot${token}/getMe" 2>/dev/null || true)
-          if [ "$(printf '%s' "$me" | jq -r '.ok // false' 2>/dev/null)" = "true" ]; then
-            printf '%s' "$me" | jq -r '"бот: \(.result.username) (id \(.result.id))"'
-          else
-            printf 'ошибка Telegram: %s\n' "$(printf '%s' "$me" | jq -r '.description // "нет ответа"' 2>/dev/null)"
-          fi
-
-          echo "--- chat id из последних сообщений ---"
-          upd=$(curl -sS -m 20 "https://api.telegram.org/bot${token}/getUpdates" 2>/dev/null || true)
-          ids=$(printf '%s' "$upd" | jq -r '[.result[]? | (.message // .edited_message // .channel_post // empty) | .chat | select(.id) | "CHAT_ID=\(.id)  (\(.username // .title // .first_name // ""))"] | unique | .[]' 2>/dev/null)
-          if [ -n "$ids" ]; then
-            printf '%s\n' "$ids"
-          else
-            echo "обновлений нет: напишите боту любое сообщение и запустите снова"
-          fi
