@@ -93,7 +93,7 @@ jobs:
             | jq -c '{url: (.result.url // ""), pending: (.result.pending_update_count // "?"), last_error: (.result.last_error_message // "нет"), last_error_date: (.result.last_error_date // 0)}'
           echo "--- getUpdates (конфликт = вебхук включён и перехватывает обновления) ---"
           curl -sS -m 20 "https://api.telegram.org/bot${token}/getUpdates" 2>/dev/null \
-            | jq -c '{ok, description, updates: ((.result // []) | length), kinds: ([(.result // [])[] | keys[] | select(. != "update_id")] | unique)}'
+            | jq -c '{updates: ((.result // []) | length), items: [(.result // [])[] | {kind: ([keys[] | select(. != "update_id")] | first), text: (.message.text // .callback_query.data // ""), date: (.message.date // 0)}]}'
           echo "--- команды бота ---"
           curl -sS -m 20 "https://api.telegram.org/bot${token}/getMyCommands" 2>/dev/null \
             | jq -c '{ok, commands: [.result[]?.command]}'
