@@ -23,16 +23,19 @@ trim() {
 TELEGRAM_BOT_TOKEN="$(trim "$TELEGRAM_BOT_TOKEN")"
 TELEGRAM_CHAT_ID="$(trim "$TELEGRAM_CHAT_ID")"
 
+problems=0
 if ! printf '%s' "$TELEGRAM_BOT_TOKEN" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{20,}$'; then
   colons=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | tr -cd ':' | wc -c | tr -d ' ')
   nonascii=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | LC_ALL=C tr -d '\000-\177' | wc -c | tr -d ' ')
-  echo "::error::TELEGRAM_BOT_TOKEN не похож на токен бота: длина ${#TELEGRAM_BOT_TOKEN} (норма ~46), двоеточий: $colons, не-ASCII символов: $nonascii"
-  exit 1
+  echo "::error::TELEGRAM_BOT_TOKEN не похож на токен бота: длина ${#TELEGRAM_BOT_TOKEN} (норма ~46), двоеточий: $colons (нужно ровно 1), не-ASCII символов: $nonascii"
+  problems=1
 fi
 if ! printf '%s' "$TELEGRAM_CHAT_ID" | grep -Eq '^-?[0-9]+$'; then
-  echo "::error::TELEGRAM_CHAT_ID должен быть числом, а пришло ${#TELEGRAM_CHAT_ID} символов — вставлено не то значение"
-  exit 1
+  digits=$(printf '%s' "$TELEGRAM_CHAT_ID" | tr -cd '0-9' | wc -c | tr -d ' ')
+  echo "::error::TELEGRAM_CHAT_ID должен быть числом: пришло ${#TELEGRAM_CHAT_ID} символов, из них цифр: $digits (должны быть все)"
+  problems=1
 fi
+[ "$problems" -eq 0 ] || exit 1
 
 repo="${REPO:-}" workflow="${WORKFLOW:-}" status="${STATUS:-unknown}"
 run_url="${RUN_URL:-}" commit="${COMMIT:-}" jobs="${JOBS:-}"
