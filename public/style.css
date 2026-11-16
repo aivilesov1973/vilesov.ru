@@ -121,3 +121,41 @@ section {
 
 /* --- Выравнивание надписей по центру --- */
 .intro { text-align: center; }
+
+/* --- Точка с автором фото --- */
+.hero { position: relative; }
+.credit {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9a9a9a;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  cursor: default;
+  outline: none;
+}
+.credit::after {
+  content: attr(data-credit);
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgba(10, 10, 10, 0.88);
+  color: #f2f2f2;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+.credit:hover::after,
+.credit:focus-visible::after { opacity: 1; transform: translateY(0); }
+@media (max-width: 480px) {
+  .credit { right: 8px; bottom: 8px; }
+}
