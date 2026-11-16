@@ -16,7 +16,23 @@ const elapsed = fmt(Date.now() - BIRTH.getTime());
 ---
 <Base>
   <figure class="hero">
+    <video
+      class="hero-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      poster="/img/hero.webp"
+      width="960"
+      height="640"
+      aria-label="Ночная набережная: плывут облака, рябь на воде, мерцают фонари"
+    >
+      <source src="/img/hero_loop.webm" type="video/webm" />
+      <source src="/img/hero_loop.mp4" type="video/mp4" />
+    </video>
     <img
+      class="hero-still"
       src="/img/hero.webp"
       width="640"
       height="427"

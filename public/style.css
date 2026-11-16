@@ -159,3 +159,11 @@ section {
 @media (max-width: 480px) {
   .credit { right: 8px; bottom: 8px; }
 }
+
+/* --- Живое фото --- */
+.hero-video { display: block; width: 100%; height: auto; border-radius: 8px; }
+.hero-still { display: none; width: 100%; height: auto; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+  .hero-still { display: block; }
+}
