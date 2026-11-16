@@ -48,7 +48,7 @@ case "$status" in
   *)        icon="ℹ️" ;;
 esac
 
-msg="${icon} <b>${WORKFLOW:-deploy}</b>: ${status}"
+msg="${icon} <b>🌐 Сайт</b> · ${WORKFLOW:-deploy}: ${status}"
 [ -n "$repo" ]    && msg="${msg}
 Репозиторий: ${repo}"
 [ -n "$jobs" ]    && msg="${msg}
