@@ -161,9 +161,9 @@ section {
 }
 
 /* --- Живое фото --- */
-.hero-video { display: block; width: 100%; height: auto; border-radius: 8px; }
-.hero-still { display: none; width: 100%; height: auto; border-radius: 8px; }
+.hero .hero-video { display: block; width: 100%; height: auto; border-radius: 8px; }
+.hero .hero-still { display: none; width: 100%; height: auto; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) {
-  .hero-video { display: none; }
-  .hero-still { display: block; }
+  .hero .hero-video { display: none; }
+  .hero .hero-still { display: block; }
 }
