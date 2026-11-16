@@ -49,8 +49,6 @@ case "$status" in
 esac
 
 msg="${icon} <b>🌐 Сайт</b> · ${WORKFLOW:-deploy}: ${status}"
-[ -n "$repo" ]    && msg="${msg}
-Репозиторий: ${repo}"
 [ -n "$jobs" ]    && msg="${msg}
 Джобы: ${jobs}"
 # коммит не показываем — в тестовых и плановых сообщениях это шум.
