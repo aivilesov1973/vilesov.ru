@@ -53,10 +53,12 @@ msg="${icon} <b>🌐 Сайт</b> · ${WORKFLOW:-deploy}: ${status}"
 Репозиторий: ${repo}"
 [ -n "$jobs" ]    && msg="${msg}
 Джобы: ${jobs}"
-[ -n "$commit" ]  && msg="${msg}
-Коммит: <code>${commit:0:7}</code>"
-[ -n "$run_url" ] && msg="${msg}
+# коммит не показываем — в тестовых и плановых сообщениях это шум.
+# ссылку на прогон даём только при реальном сбое, чтобы было куда перейти.
+if [ "$status" = "failure" ] && [ -n "$run_url" ]; then
+  msg="${msg}
 ${run_url}"
+fi
 
 resp=$(curl -sS -m 20 -X POST \
   "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
