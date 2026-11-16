@@ -118,3 +118,6 @@ section {
 @media (max-width: 480px) {
   .counter { font-size: 1.7rem; letter-spacing: 0.02em; }
 }
+
+/* --- Выравнивание надписей по центру --- */
+.intro { text-align: center; }
