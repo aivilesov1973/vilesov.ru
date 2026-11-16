@@ -104,27 +104,17 @@ section {
 .hero { margin: 0 0 40px; }
 .hero img { display: block; width: 100%; height: auto; border-radius: 8px; }
 
-/* --- Счётчик минут --- */
+/* --- Матричный счётчик прожитого времени --- */
 .counter {
-  margin: 20px 0 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2.6rem;
-  line-height: 1.1;
+  margin: 22px 0 0;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 2.4rem;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-.counter .unit {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 0.95rem;
-  color: var(--muted);
-  margin-left: 10px;
-  letter-spacing: 0;
-}
-.since {
-  margin: 8px 0 0;
-  font-size: 0.95rem;
-  color: var(--muted);
+  letter-spacing: 0.06em;
+  color: #00ff41;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 22px rgba(0, 255, 65, 0.28);
 }
 @media (max-width: 480px) {
-  .counter { font-size: 2rem; }
+  .counter { font-size: 1.7rem; letter-spacing: 0.02em; }
 }

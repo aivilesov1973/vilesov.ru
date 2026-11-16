@@ -4,8 +4,15 @@ import { SITE } from '../data/site';
 
 // 22 июля 1973, 05:15 по Москве (UTC+3)
 const BIRTH = new Date('1973-07-22T05:15:00+03:00');
-const minutesNow = Math.floor((Date.now() - BIRTH.getTime()) / 60000);
-const nf = new Intl.NumberFormat('ru-RU');
+const pad = (n: number) => String(n).padStart(2, '0');
+const fmt = (ms: number) => {
+  const t = Math.floor(ms / 1000);
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  return `${h}:${pad(m)}:${pad(s)}`;
+};
+const elapsed = fmt(Date.now() - BIRTH.getTime());
 ---
 <Base>
   <figure class="hero">
@@ -19,17 +26,20 @@ const nf = new Intl.NumberFormat('ru-RU');
 
   <header class="intro">
     <h1>{SITE.title}</h1>
-    <p class="counter">
-      <span id="minutes">{nf.format(minutesNow)}</span><span class="unit">минут</span>
-    </p>
+    <p class="counter" id="clock">{elapsed}</p>
   </header>
 
   <script>
     const birth = new Date('1973-07-22T05:15:00+03:00').getTime();
-    const el = document.getElementById('minutes');
-    const nf = new Intl.NumberFormat('ru-RU');
+    const el = document.getElementById('clock');
+    const pad = (n) => String(n).padStart(2, '0');
     const tick = () => {
-      if (el) el.textContent = nf.format(Math.floor((Date.now() - birth) / 60000));
+      if (!el) return;
+      const t = Math.floor((Date.now() - birth) / 1000);
+      const h = Math.floor(t / 3600);
+      const m = Math.floor((t % 3600) / 60);
+      const s = t % 60;
+      el.textContent = `${h}:${pad(m)}:${pad(s)}`;
     };
     tick();
     setInterval(tick, 1000);
