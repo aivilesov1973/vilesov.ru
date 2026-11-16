@@ -17,7 +17,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <meta property="og:description" content={description}>
   <meta property="og:url" content={canonical}>
   <meta property="og:type" content="website">
-  <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml">
   <link rel="sitemap" href="/sitemap-index.xml">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111'/><text x='16' y='22' font-family='Georgia,serif' font-size='18' text-anchor='middle' fill='%23fff'>В</text></svg>">
   <link rel="stylesheet" href="/style.css">
@@ -25,9 +24,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <body>
   <main class="wrap">
     <slot />
-    <footer class="foot">
-      © 2026 · <a href="/">vilesov.ru</a> · <a href="/notes/">все заметки</a> · <a href="/rss.xml">RSS</a>
-    </footer>
   </main>
 </body>
 </html>
