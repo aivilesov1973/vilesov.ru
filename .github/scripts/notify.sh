@@ -48,7 +48,14 @@ case "$status" in
   *)        icon="ℹ️" ;;
 esac
 
-msg="${icon} <b>🌐 Сайт</b> · ${WORKFLOW:-deploy}: ${status}"
+# человеческая формулировка: good — всё работает, bad — хоть что-то упало
+case "$status" in
+  test|success) word="good" ;;
+  failure)      word="bad" ;;
+  *)            word="$status" ;;
+esac
+
+msg="${icon} <b>🌐 Сайт</b> · ${WORKFLOW:-deploy}: ${word}"
 [ -n "$jobs" ]    && msg="${msg}
 Джобы: ${jobs}"
 # коммит не показываем — в тестовых и плановых сообщениях это шум.
