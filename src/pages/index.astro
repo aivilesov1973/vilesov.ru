@@ -1,6 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
+
+// 22 июля 1973, 05:15 по Москве (UTC+3)
+const BIRTH = new Date('1973-07-22T05:15:00+03:00');
+const minutesNow = Math.floor((Date.now() - BIRTH.getTime()) / 60000);
+const nf = new Intl.NumberFormat('ru-RU');
 ---
 <Base>
   <figure class="hero">
@@ -14,6 +19,20 @@ import { SITE } from '../data/site';
 
   <header class="intro">
     <h1>{SITE.title}</h1>
-    <p class="lead">{SITE.lead}</p>
+    <p class="counter">
+      <span id="minutes">{nf.format(minutesNow)}</span><span class="unit">минут</span>
+    </p>
+    <p class="since">с 22 июля 1973 года, 05:15</p>
   </header>
+
+  <script>
+    const birth = new Date('1973-07-22T05:15:00+03:00').getTime();
+    const el = document.getElementById('minutes');
+    const nf = new Intl.NumberFormat('ru-RU');
+    const tick = () => {
+      if (el) el.textContent = nf.format(Math.floor((Date.now() - birth) / 60000));
+    };
+    tick();
+    setInterval(tick, 1000);
+  </script>
 </Base>

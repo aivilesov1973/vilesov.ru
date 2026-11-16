@@ -103,3 +103,28 @@ section {
 /* --- Шапка с фотографией --- */
 .hero { margin: 0 0 40px; }
 .hero img { display: block; width: 100%; height: auto; border-radius: 8px; }
+
+/* --- Счётчик минут --- */
+.counter {
+  margin: 20px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.6rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.counter .unit {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-left: 10px;
+  letter-spacing: 0;
+}
+.since {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+@media (max-width: 480px) {
+  .counter { font-size: 2rem; }
+}
