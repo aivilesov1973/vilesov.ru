@@ -1,9 +1,12 @@
 name: Uptime check
 
 # Ловит падения между деплоями: сайт мог лежать, пока никто не пушил.
+# Проверка — каждые 30 минут (молча). Отчёт «good» — в 08:00 и 21:00 МСК.
+# Сбой — сообщение сразу, без ожидания отчёта.
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '15,45 * * * *'      # проверки без уведомлений
+    - cron: '0 5,18 * * *'       # 08:00 и 21:00 МСК — проверка + отчёт «good»
   workflow_dispatch:
     inputs:
       test_notify:
@@ -36,6 +39,24 @@ jobs:
           else
             bash .github/scripts/smoke.sh
           fi
+
+  # Отчёт «всё хорошо» — только по расписанию 08:00 и 21:00 МСК
+  report-good:
+    needs: check
+    if: github.event.schedule == '0 5,18 * * *' && needs.check.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Отчёт в Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATUS: success
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/notify.sh
 
   notify:
     needs: check
