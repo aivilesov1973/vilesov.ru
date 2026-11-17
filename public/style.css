@@ -167,3 +167,9 @@ section {
   .hero .hero-video { display: none; }
   .hero .hero-still { display: block; }
 }
+
+/* На узких экранах — статичное фото вместо видео (экономия трафика) */
+@media (max-width: 700px) {
+  .hero .hero-video { display: none; }
+  .hero .hero-still { display: block; }
+}

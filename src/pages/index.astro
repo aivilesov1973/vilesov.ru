@@ -2,8 +2,8 @@
 import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
 
-// 22 июля 1973, 05:15 по Москве (UTC+3)
-const BIRTH = new Date('1973-07-22T05:15:00+03:00');
+// 22 июля 1973, 03:30 по Москве (UTC+3)
+const BIRTH = new Date('1973-07-22T03:30:00+03:00');
 const pad = (n: number) => String(n).padStart(2, '0');
 const fmt = (ms: number) => {
   const t = Math.floor(ms / 1000);
@@ -38,7 +38,7 @@ const elapsed = fmt(Date.now() - BIRTH.getTime());
       height="427"
       alt="Ночная набережная, на крыше здания светится надпись: кто мы, откуда, куда мы идём?"
     />
-    <span class="credit" tabindex="0" role="note" data-credit="автор фото Дмитрий Титов"></span>
+    <span class="credit" tabindex="0" role="note" data-credit="Фото Дмитрий Титов"></span>
   </figure>
 
   <header class="intro">
@@ -47,7 +47,7 @@ const elapsed = fmt(Date.now() - BIRTH.getTime());
   </header>
 
   <script>
-    const birth = new Date('1973-07-22T05:15:00+03:00').getTime();
+    const birth = new Date('1973-07-22T03:30:00+03:00').getTime();
     const el = document.getElementById('clock');
     const pad = (n) => String(n).padStart(2, '0');
     const tick = () => {
