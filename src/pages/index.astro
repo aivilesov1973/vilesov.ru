@@ -47,6 +47,15 @@ const elapsed = fmt(Date.now() - BIRTH.getTime());
   </header>
 
   <script>
+    // Замедляем живое фото: спокойное движение облаков и воды
+    const hero = document.querySelector('.hero-video');
+    if (hero) {
+      const slow = () => { hero.playbackRate = 0.5; };
+      slow();
+      hero.addEventListener('loadedmetadata', slow);
+      hero.addEventListener('play', slow);
+    }
+
     const birth = new Date('1973-07-22T03:30:00+03:00').getTime();
     const el = document.getElementById('clock');
     const pad = (n) => String(n).padStart(2, '0');
